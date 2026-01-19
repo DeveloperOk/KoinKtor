@@ -3,6 +3,7 @@ package com.enterprise.koinktor.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.enterprise.koinktor.model.Post
+import com.enterprise.koinktor.network.exception.NoInternetConnectionException
 import com.enterprise.koinktor.repository.PostRepository
 import io.ktor.client.call.body
 import kotlinx.coroutines.Dispatchers
@@ -21,6 +22,15 @@ class PostViewModel(
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
 
+    private val _isNoInternetConnectionDialogVisible = MutableStateFlow(false)
+    val isNoInternetConnectionDialogVisible: StateFlow<Boolean> = _isNoInternetConnectionDialogVisible
+
+    fun updateNoInternetConnectionDialogVisible(newValue: Boolean){
+
+        _isNoInternetConnectionDialogVisible.update{ newValue }
+
+    }
+
     init {
         fetchPosts()
     }
@@ -36,6 +46,13 @@ class PostViewModel(
 
             } catch (e: Exception) {
                 e.printStackTrace()
+
+                if(e is NoInternetConnectionException){
+
+                    _isNoInternetConnectionDialogVisible.update { true }
+
+                }
+
             } finally {
                 _loading.update { false }
             }

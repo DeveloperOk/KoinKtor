@@ -9,7 +9,7 @@ import org.koin.dsl.module
 val appModule = module {
 
     // Network
-    single { provideHttpClient() }
+    single { provideHttpClient(get()) }
 
     // Repository
     single { PostRepository(get()) }
