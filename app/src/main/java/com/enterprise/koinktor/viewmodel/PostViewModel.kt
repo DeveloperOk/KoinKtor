@@ -1,9 +1,11 @@
 package com.enterprise.koinktor.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.enterprise.koinktor.model.Post
 import com.enterprise.koinktor.network.exception.NoInternetConnectionException
+import com.enterprise.koinktor.remotedatasource.PostAPIConstants
 import com.enterprise.koinktor.repository.PostRepository
 import io.ktor.client.call.body
 import kotlinx.coroutines.Dispatchers
@@ -15,6 +17,8 @@ import kotlinx.coroutines.launch
 class PostViewModel(
     private val repository: PostRepository
 ) : ViewModel() {
+
+    val TAG = "PostViewModel"
 
     private val _posts = MutableStateFlow<List<Post>>(emptyList())
     val posts: StateFlow<List<Post>> = _posts
@@ -42,7 +46,16 @@ class PostViewModel(
 
                 val httpResponse = repository.getPosts()
 
-                _posts.update { httpResponse.body() }
+                if (httpResponse.status.value == PostAPIConstants.HttpCodeOK){
+
+                    _posts.update { httpResponse.body() }
+
+                }else{
+
+                    Log.d(TAG, "Error: HttpResponseStatusValue of " + httpResponse.status.value
+                            + " HttpResponseStatusDescriptionOf " + httpResponse.status.description)
+
+                }
 
             } catch (e: Exception) {
                 e.printStackTrace()
